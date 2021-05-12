@@ -1,12 +1,13 @@
 package edu.knu.wanted;
 
 
+import com.sun.istack.Nullable;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.BufferedReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 @RestController
 public class UserController {
@@ -17,9 +18,44 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    List<User> all(){
+    List<?> userRating(@RequestParam(value="uid", required = false) String uid){
 
-        return repository.findAll();
+        if(uid == null) {
+            return repository.findAll();
+        }
+
+        BufferedReader br = null;
+        ArrayList<String> tmpList = new ArrayList<String>();
+        String array[];
+
+        try{
+
+            br = Files.newBufferedReader(Paths.get("./ml-latest-small/ratings.csv"));
+            String line = "";
+            while((line = br.readLine()) != null) {
+
+                array = line.split(",");
+
+                if (array[0].equals(uid)) {
+
+                    tmpList.add(array[1]);
+
+                }
+            }
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if(br != null) {
+                    br.close();
+                }
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return tmpList;
     }
 
     @DeleteMapping("/users")
