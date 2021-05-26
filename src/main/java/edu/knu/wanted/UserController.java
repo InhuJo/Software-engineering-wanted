@@ -28,6 +28,7 @@ public class UserController {
         this.repository = repository;
     }
 
+    // 디비 연결
     ConnectionString connString = new ConnectionString(
             "mongodb+srv://inu:1123@cluster0.zedfu.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
     );
@@ -39,57 +40,22 @@ public class UserController {
     MongoClient client = MongoClients.create(settings);
     MongoDatabase database = client.getDatabase("software-engineering");
 
+    // 전체 유저 출력
     @GetMapping("/users")
-    List<?> userRating(@RequestParam(value="uid", required = false) String uid){
-        // 전체 유저 출력
-        if(uid == null) {
-            MongoCollection<Document> users = database.getCollection("users");
-            ArrayList<Object> list = new ArrayList<>();
+    List<?> userRating(){
+        ArrayList<Object> list = new ArrayList<>();
 
-            JSONParser jsonParser = new JSONParser();
+        MongoCollection<Document> users = database.getCollection("users");
+        JSONParser jsonParser = new JSONParser();
 
-            for(Document doc: users.find()) {
-                try {
-                    list.add(jsonParser.parse(doc.toJson()));
-                } catch(Exception e) {
-                    System.out.println(e);
-                }
-            }
-            return list;
-        }
-
-        BufferedReader br = null;
-        ArrayList<String> tmpList = new ArrayList<String>();
-        String array[];
-
-        try{
-
-            br = Files.newBufferedReader(Paths.get("./ml-latest-small/ratings.csv"));
-            String line = "";
-            while((line = br.readLine()) != null) {
-
-                array = line.split(",");
-
-                if (array[0].equals(uid)) {
-
-                    tmpList.add(array[1]);
-
-                }
-            }
-
-        } catch(Exception e) {
-            e.printStackTrace();
-        } finally {
+        for(Document doc: users.find()) {
             try {
-                if(br != null) {
-                    br.close();
-                }
-            }catch(Exception e) {
-                e.printStackTrace();
+                list.add(jsonParser.parse(doc.toJson()));
+            } catch(Exception e) {
+                System.out.println(e);
             }
         }
-
-        return tmpList;
+        return list;
     }
 
     // 유저 수 출력
@@ -99,60 +65,23 @@ public class UserController {
         return users.countDocuments();
     }
 
-    // 해당 유저 영화 평점 입력
+    // 해당 유저가 매긴 영화 평점 출력
     @GetMapping("/users/{userid}/ratings")
-    ArrayList<String> list_ratings(@PathVariable("userid") String uid)
+    List<Document> list_ratings(@PathVariable("userid") String uid)
     {
         MongoCollection<Document> users = database.getCollection("users");
-        MongoCursor<Document> it = null;
-        BufferedReader br = null;
-        ArrayList<String> tmpList = new ArrayList<String>();
-        String array[];
+        Document doc = new Document("uid", uid);
+        Document document = users.find(doc).first();
+        List<Document> list = new ArrayList<>();
 
-        try {
-            Document doc = new Document("uid", uid);
-            it = users.find(doc).iterator();
-        } catch (Exception e) {
-            System.out.println(e);
+        if(document != null) {
+            list = document.getList("info", Document.class);
         }
 
-        if(it != null) {
-            try {
-                br = Files.newBufferedReader(Paths.get("./ml-latest-small/ratings.csv"));
-                String line = "";
-                while((line = br.readLine()) != null) {
-                    array=line.split(",");
-
-                }
-            }catch(Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-//        try{
-//            br = Files.newBufferedReader(Paths.get("./ml-latest-small/ratings.csv"));
-//            String line = "";
-//            while((line = br.readLine()) != null) {
-//
-//
-//            }
-//
-//        } catch(Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            try {
-//                if(br != null) {
-//                    br.close();
-//                }
-//            }catch(Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-
-        return tmpList;
+        return list;
     }
 
-    // 해당 유저 영화 평점 입력
+    // 해당 유저의 영화 평점 입력
     @PutMapping("/users/{uid}/ratings")
     @ResponseBody
     HashMap findRating(@PathVariable("uid") String uid, @RequestParam String movie, @RequestParam String rating)
