@@ -87,7 +87,7 @@ public class UserController {
     HashMap findRating(@PathVariable("uid") String uid, @RequestParam String movie, @RequestParam String rating)
     {
         MongoCollection<Document> users = database.getCollection("users");
-        MongoCursor<Document> it = null;
+        Document doc_ = null;
         Document doc = new Document("uid", uid);
 
         BufferedReader br = null;
@@ -100,13 +100,13 @@ public class UserController {
 
         // 해당 유저가 존재하는지 검사
         try {
-            it = users.find(doc).iterator();
+            doc_ = users.find(doc).first();
         } catch (Exception e) {
             System.out.println(e);
         }
 
         // 영화아이디가 존재하는지 검사
-        if(it != null) {
+        if(doc_ != null) {
             try {
                 br = Files.newBufferedReader(Paths.get("./ml-latest-small/ratings.csv"));
                 String line = "";
@@ -128,19 +128,21 @@ public class UserController {
             int r = Integer.parseInt(rating);
 
             if(r >= 1 && r <= 5) {
-                // 해당 영화에 대한 평점이 있는지 검사
+                // 해당 영화에 대한 평점이 있는지 검사, 있으면 그 부분 업데이트
                 try {
-//                    Document document = users.find().first();
-//                    List<Document> list = document.getList("info", Document.class);
-//
-//                    for(Document d : list) {
-//                        if(d.get("movie").equals(movie)) {
-//                            users.updateOne(d, new Document("$set", new Document("rating", rating)));
-//                        }
-//                    }
+                    List<Document> list = doc_.getList("info", Document.class);
 
-                    Document doc_ = new Document("info", new Document("movie", movie).append("rating", rating));
-                    Document updateQuery = new Document("$push", doc_);
+                    if(list != null) {
+                        for(Document d : list) {
+                            if(d.get("movie").equals(movie)) {
+                                Document update = new Document("$pull", new Document("info", new Document("movie", movie)));
+                                users.updateOne(doc, update);
+                            }
+                        }
+                    }
+
+                    Document update = new Document("info", new Document("movie", movie).append("rating", rating));
+                    Document updateQuery = new Document("$push", update);
                     users.updateOne(doc, updateQuery);
                     flag = true;
                 } catch (Exception e) {
@@ -226,9 +228,7 @@ public class UserController {
 
         try {
             Document doc = new Document("uid",uid)
-                    .append("passwd", passwd)
-                    .append("movie", "")
-                    .append("rating", "");
+                    .append("passwd", passwd);
             users.insertOne(doc);
             flag = true;
         }
