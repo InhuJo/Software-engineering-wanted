@@ -1,10 +1,7 @@
 package edu.knu.wanted;
 
 
-import com.mongodb.BasicDBList;
-import com.mongodb.ConnectionString;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClientSettings;
+import com.mongodb.*;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
@@ -172,12 +169,14 @@ public class UserController {
         boolean flag = false;
         boolean findMovie = false;
 
+        // 해당 유저가 존재하는지 검사
         try {
             it = users.find(doc).iterator();
         } catch (Exception e) {
             System.out.println(e);
         }
 
+        // 영화아이디가 존재하는지 검사
         if(it != null) {
             try {
                 br = Files.newBufferedReader(Paths.get("./ml-latest-small/ratings.csv"));
@@ -195,29 +194,25 @@ public class UserController {
             }
         }
 
+        // 올바른 평점인지 검사 후 업데이트
         if(findMovie){
             int r = Integer.parseInt(rating);
 
-            /*if(r >= 1 && r <= 5) {
-                try {
-                    Document doc_ = new Document("movie", movie)
-                            .append("rating", rating);
-                    users.findOneAndUpdate(doc, new Document("$set", new Document()));
-                    System.out.println("update user");
-                    flag = true;
-                } catch (Exception e) {
-                    System.out.println(e);
-                }
-            }*/
-
             if(r >= 1 && r <= 5) {
+                // 해당 영화에 대한 평점이 있는지 검사
                 try {
-                    users.find(doc);
+//                    Document document = users.find().first();
+//                    List<Document> list = document.getList("info", Document.class);
+//
+//                    for(Document d : list) {
+//                        if(d.get("movie").equals(movie)) {
+//                            users.updateOne(d, new Document("$set", new Document("rating", rating)));
+//                        }
+//                    }
 
                     Document doc_ = new Document("info", new Document("movie", movie).append("rating", rating));
                     Document updateQuery = new Document("$push", doc_);
                     users.updateOne(doc, updateQuery);
-                    System.out.println("update user");
                     flag = true;
                 } catch (Exception e) {
                     System.out.println(e);
