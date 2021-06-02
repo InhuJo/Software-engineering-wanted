@@ -40,22 +40,47 @@ public class UserController {
     MongoClient client = MongoClients.create(settings);
     MongoDatabase database = client.getDatabase("software-engineering");
 
-    // 전체 유저 출력
+    // 전체 유저 출력 or 해당 유저 영화 평점 출력
     @GetMapping("/users")
-    List<?> userRating(){
-        ArrayList<Object> list = new ArrayList<>();
-
+    List<?> userRating(@RequestParam(value="uid", required = false) String uid){
         MongoCollection<Document> users = database.getCollection("users");
+        ArrayList<Object> allUserList = new ArrayList<>();
+        List<Document> userRatingList = new ArrayList<>();
+        List<HashMap<String, String>> statusList = new ArrayList<>();
+        HashMap<String, String> status = new HashMap<>();
         JSONParser jsonParser = new JSONParser();
+        boolean flag = false;
 
-        for(Document doc: users.find()) {
-            try {
-                list.add(jsonParser.parse(doc.toJson()));
-            } catch(Exception e) {
-                System.out.println(e);
+        if(uid == null) {
+            for(Document doc: users.find()) {
+                try {
+                    allUserList.add(jsonParser.parse(doc.toJson()));
+                } catch(Exception e) {
+                    System.out.println(e);
+                }
+            }
+            return allUserList;
+        } else {
+            Document doc = new Document("uid", uid);
+            Document document = users.find(doc).first();
+
+            if(document != null) {
+                userRatingList = document.getList("info", Document.class);
+                flag = true;
+            }  else {
+                status.put("result", "Cannot find user");
+                statusList.add(status);
+            }
+
+            if(flag) {
+                if(userRatingList == null) {
+                    userRatingList = new ArrayList<>();
+                }
+                return userRatingList;
+            } else {
+                return statusList;
             }
         }
-        return list;
     }
 
     // 유저 수 출력
@@ -67,18 +92,129 @@ public class UserController {
 
     // 해당 유저가 매긴 영화 평점 출력
     @GetMapping("/users/{userid}/ratings")
-    List<Document> list_ratings(@PathVariable("userid") String uid)
+    List<?> list_ratings2(@PathVariable("userid") String uid)
     {
         MongoCollection<Document> users = database.getCollection("users");
+        List<Document> list = new ArrayList<>();
+        List<HashMap<String, String>> list2 = new ArrayList<>();
+        HashMap<String, String> status = new HashMap<>();
+        boolean flag = false;
+
         Document doc = new Document("uid", uid);
         Document document = users.find(doc).first();
-        List<Document> list = new ArrayList<>();
 
         if(document != null) {
             list = document.getList("info", Document.class);
+            flag = true;
+        } else {
+            status.put("result", "Cannot find user");
+            list2.add(status);
         }
 
-        return list;
+        if(flag) {
+            if(list == null) {
+                list = new ArrayList<>();
+            }
+            return list;
+        } else {
+            return list2;
+        }
+    }
+
+    // 유저 삭제
+    // curl -X DELETE “http://localhost:8080/users?uid=username”
+    @DeleteMapping("/users")
+    @ResponseBody
+    HashMap deleteUser(@RequestParam String uid)
+    {
+        MongoCollection<Document> users = database.getCollection("users");
+        HashMap<String, String> status= new HashMap<String, String>();
+        Document doc = new Document("uid", uid);
+        boolean flag = false;
+
+        Document _doc = users.find(doc).first();
+
+        if(_doc != null) {
+            try {
+                users.findOneAndDelete(doc);
+                flag = true;
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+
+        //기존 리스트에 유저가 없는 경우 처리
+        if(flag)
+            status.put("result","SUCCESS");
+        else
+            status.put("result","FAILED");
+
+        return status;
+    }
+
+    // 유저 삭제
+    // curl -X DELETE “http://localhost:8080/users/username”
+    @DeleteMapping("/users/{uid}")
+    @ResponseBody
+    HashMap deleteUser2(@PathVariable("uid") String uid)
+    {
+        MongoCollection<Document> users = database.getCollection("users");
+        HashMap<String, String> status= new HashMap<String, String>();
+        Document doc = new Document("uid", uid);
+        boolean flag = false;
+
+        Document _doc = users.find(doc).first();
+
+        if(_doc != null) {
+            try {
+                users.findOneAndDelete(doc);
+                flag = true;
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+
+        //기존 리스트에 유저가 없는 경우 처리
+        if(flag)
+            status.put("result","SUCCESS");
+        else
+            status.put("result","FAILED");
+
+        return status;
+    }
+
+    // 유저 추가
+    @PutMapping("/users")
+    @ResponseBody
+    HashMap newUser2(@RequestParam String uid, @RequestParam String passwd)
+    {
+        HashMap<String, String> status= new HashMap<String, String>();
+        MongoCollection<Document> users = database.getCollection("users");
+        boolean flag = false;
+
+        Document doc_ = new Document("uid", uid);
+        doc_ = users.find(doc_).first();
+        System.out.println(doc_);
+
+        if(doc_ == null) {
+            try {
+                Document doc = new Document("uid",uid)
+                        .append("passwd", passwd);
+                users.insertOne(doc);
+                flag = true;
+            }
+            catch(Exception e) {
+                System.out.println("error : " + e.toString());
+            }
+        }
+
+        if(flag) {
+            status.put("result", "SUCCESS");
+        } else {
+            status.put("result","FAILED");
+        }
+
+        return status;
     }
 
     // 해당 유저의 영화 평점 입력
@@ -125,7 +261,9 @@ public class UserController {
 
         // 올바른 평점인지 검사 후 업데이트
         if(findMovie){
-            int r = Integer.parseInt(rating);
+             double r = Double.parseDouble(rating);
+
+             System.out.println(r);
 
             if(r >= 1 && r <= 5) {
                 // 해당 영화에 대한 평점이 있는지 검사, 있으면 그 부분 업데이트
@@ -160,114 +298,4 @@ public class UserController {
 
     }
 
-    // 유저 삭제
-    @DeleteMapping("/users/{uid}")
-    @ResponseBody
-    HashMap deleteUser2(@PathVariable("uid") String uid)
-    {
-        MongoCollection<Document> users = database.getCollection("users");
-        HashMap<String, String> status= new HashMap<String, String>();
-        boolean flag = false;
-
-        try {
-            Document doc = new Document("uid", uid);
-            users.findOneAndDelete(doc);
-            flag = true;
-        } catch(Exception e) {
-            System.out.println(e);
-        }
-
-        //기존 리스트에 유저가 없는 경우 처리
-        if(flag)
-            status.put("result","SUCCESS");
-        else
-            status.put("result","FAILED");
-
-        return status;
-    }
-
-//    @DeleteMapping("/users")
-//    HashMap deleteUser(@RequestParam String uid)
-//    {
-//        List<User> userList = repository.findAll();
-//        Iterator<User> iter = userList.iterator();
-//        HashMap<String, String> status= new HashMap<String, String>();
-//
-//        boolean flag = false;
-//        while (iter.hasNext())
-//        {
-//            User user = iter.next();
-//            if (user.getUid().equals(uid)) {
-//                try {
-//                    flag=true;
-//                    repository.delete(user);
-//                }
-//                catch(Exception e){
-//                    flag=false;
-//                    System.out.println("error : "+e.toString());
-//                }
-//                break;
-//            }
-//        }
-//        //기존 리스트에 유저가 없는 경우 처리
-//        if(flag)
-//            status.put("result","SUCCESS");
-//        else
-//            status.put("result","FAILED");
-//        return status;
-//    }
-
-    // 유저 추가
-    @PutMapping("/users")
-    @ResponseBody
-    HashMap newUser2(@RequestParam("uid") String uid, @RequestParam String passwd)
-    {
-        HashMap<String, String> status= new HashMap<String, String>();
-        MongoCollection<Document> users = database.getCollection("users");
-        boolean flag = false;
-
-        Document doc_ = new Document("uid", uid);
-        doc_ = users.find(doc_).first();
-        System.out.println(doc_);
-
-        if(doc_ != null) {
-            flag = false;
-        } else {
-            try {
-                Document doc = new Document("uid",uid)
-                        .append("passwd", passwd);
-                users.insertOne(doc);
-                flag = true;
-            }
-            catch(Exception e) {
-                System.out.println("error : " + e.toString());
-            }
-        }
-
-        if(flag) {
-            status.put("result", "SUCCESS");
-        } else {
-            status.put("result","FAILED");
-        }
-
-        return status;
-    }
-
-//    @PutMapping("/users")
-//    HashMap newUser(@RequestParam String uid, @RequestParam String passwd)
-//    {
-//        User newUser = new User(uid, passwd);
-//        HashMap<String, String> status= new HashMap<String, String>();
-//
-//        try {
-//            repository.save(newUser); //throw?
-//            status.put("result","SUCCESS");
-//        }
-//        catch(Exception e){
-//            System.out.println("error : "+e.toString());
-//            status.put("result","FAILED");
-//        }
-//
-//        return status;
-//    }
 }
