@@ -218,22 +218,30 @@ public class UserController {
 //    }
 
     // 유저 추가
-    @PutMapping("/{uid}")
+    @PutMapping("/users")
     @ResponseBody
-    HashMap newUser2(@PathVariable("uid") String uid, @RequestParam String passwd)
+    HashMap newUser2(@RequestParam("uid") String uid, @RequestParam String passwd)
     {
         HashMap<String, String> status= new HashMap<String, String>();
         MongoCollection<Document> users = database.getCollection("users");
         boolean flag = false;
 
-        try {
-            Document doc = new Document("uid",uid)
-                    .append("passwd", passwd);
-            users.insertOne(doc);
-            flag = true;
-        }
-        catch(Exception e){
-            System.out.println("error : "+e.toString());
+        Document doc_ = new Document("uid", uid);
+        doc_ = users.find(doc_).first();
+        System.out.println(doc_);
+
+        if(doc_ != null) {
+            flag = false;
+        } else {
+            try {
+                Document doc = new Document("uid",uid)
+                        .append("passwd", passwd);
+                users.insertOne(doc);
+                flag = true;
+            }
+            catch(Exception e) {
+                System.out.println("error : " + e.toString());
+            }
         }
 
         if(flag) {
