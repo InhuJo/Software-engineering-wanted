@@ -288,9 +288,9 @@
 </div>
 <div class="container">
     <div class="checkUser">
-        <p><num>0</num>명</p>
-        <button id="count" onclick="">유저 숫자 확인</button>
-        <script type="text/javascript">
+        <form action="http://localhost:8080/users/_count_" method = "GET">
+            <button id="count" onclick="">유저 숫자 확인</button>
+            <script type="text/javascript">
                 $(document).ready(function() {
                     $("#count").on("click", function(e) {
                         e.preventDefault();
@@ -303,6 +303,7 @@
                    .then((response) => console.log(response.body));
                 }
             </script>
+        </form>
     </div>
 </div>
 <div class="container">
