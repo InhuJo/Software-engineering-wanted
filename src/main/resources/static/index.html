@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://code.jQuery.com/jQuery-3.2.1.min.js"></script>
+    <title>Wanted</title>
+    <style>
+        @import url(//fonts.googleapis.com/earlyaccess/jejugothic.css);
+        *{
+            padding: 0px;
+            margin: 0px;
+            box-sizing: border-box;
+            font-family: 'Jeju Gothic', sans-serif;
+        }
+        .header{
+            display:flex;
+            width:100%;
+            top:0;
+            left:0;
+            height: 60px;
+            background-color: #02343F;
+            color: #fff;
+            padding: 20px 10px;
+        }
+        .header name{
+            font-weight: 300;
+            font-size: 22px;
+        }
+        .container{
+            position:relative;
+            width: 100%;
+            display: flex;
+        }
+        .add{
+            width: 100%;
+            background-color: #F0EDCC;
+            background-size: cover;
+            background-position: center;
+            padding: 100px;
+        }
+        .add legend{
+            margin-bottom: 20px;
+        }
+        .add .input{
+            margin-bottom: 40px;
+        }
+        .add .input input{
+            width: 100%;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            outline: none;
+            padding: 10px 0;
+            font-size: 18px;
+            font-weight: 300;
+            color: #000;
+            border-bottom: 2px solid #000;
+        }
+        .add .input input::placeholder{
+            color: #000;
+        }
+        .add .input input[type="submit"]{
+            width: 150px;
+            height: 50px;
+            background: #fff;
+            color: #111;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .delete{
+            width: 100%;
+            background-color: #02343F;
+            background-size: cover;
+            background-position: center;
+            padding: 100px;
+        }
+        .delete legend{
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .delete .input{
+            margin-bottom: 40px;
+        }
+        .delete .input input{
+            width: 100%;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            outline: none;
+            padding: 10px 0;
+            font-size: 18px;
+            font-weight: 300;
+            color: #fff;
+            border-bottom: 2px solid #fff;
+        }
+        .delete .input input::placeholder{
+            color: #fff;
+        }
+        .delete .input input[type="submit"]{
+            width: 150px;
+            height: 50px;
+            background: #fff;
+            color: #111;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .rating{
+            width: 100%;
+            background-color: #F0EDCC;
+            background-size: cover;
+            background-position: center;
+            padding: 100px;
+        }
+        .rating legend{
+            margin-bottom: 20px;
+        }
+        .rating hh{
+            font-size: 18px;
+            font-weight: 300;
+            margin-right: 20px;
+        }
+        .rating select{
+            border: none;
+            box-shadow: none;
+            outline: none;
+            background: transparent;
+            font-size: 15px;
+        }
+        .rating .input{
+            margin-bottom: 40px;
+        }
+        .rating .input input{
+            width: 100%;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            outline: none;
+            padding: 10px 0;
+            font-size: 18px;
+            font-weight: 300;
+            color: #000;
+            border-bottom: 2px solid #000;
+        }
+        .rating .input input::placeholder{
+            color: #000;
+        }
+        .rating .input input[type="submit"]{
+            width: 150px;
+            height: 50px;
+            background: #fff;
+            color: #111;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .checkUser{
+            display:flex;
+            position:relative;
+            align-items:center;
+            justify-content:space-around;
+            width:100%;
+            height:400px;
+            background-color: #02343F;
+        }
+        .checkUser num, .checkUser p{
+            font-size: 60px;
+            color: #fff;
+            font-weight: 300;
+        }
+        .checkUser button{
+            width: 150px;
+            height: 50px;
+            background: #fff;
+            color: #111;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 20px;
+            font-weight: 300;
+            border: none;
+        }
+        .checkMovieList{
+            width:100%;
+            background-color:#F0EDCC;
+        }
+        .checkMovieList{
+            width: 100%;
+            background-color:  #F0EDCC;
+            background-size: cover;
+            background-position: center;
+            padding: 100px;
+        }
+        .checkMovieList legend{
+            color: #000;
+            margin-bottom: 20px;
+        }
+        .checkMovieList .input{
+            margin-bottom: 40px;
+        }
+        .checkMovieList .input input{
+            width: 100%;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            outline: none;
+            padding: 10px 0;
+            font-size: 18px;
+            font-weight: 300;
+            color: #000;
+            border-bottom: 2px solid #000;
+        }
+        .checkMovieList .input input::placeholder{
+            color: #000;
+        }
+        .checkMovieList .input input[type="submit"]{
+            width: 150px;
+            height: 50px;
+            background: #fff;
+            color: #111;
+            cursor: pointer;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <name>소프트웨어 공학 Wanted</name>
+</div>
+<div class="container">
+    <div class="add">
+        <form>
+            <legend>유저 추가</legend>
+            <div class="input">
+                <input type="text" name="" placeholder="User id" required>
+            </div>
+            <div class="input">
+                <input type="password" name="" placeholder="password" required>
+            </div>
+            <div class="input">
+                <input type="submit" name="" value="Send">
+            </div>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="delete">
+        <form>
+            <legend>유저 삭제</legend>
+            <div class="input">
+                <input type="text" name="" placeholder="User id" required>
+            </div>
+            <div class="input">
+                <input type="submit" name="" value="Send">
+            </div>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="rating">
+        <form>
+            <legend>유저 무비 레이팅 추가</legend>
+            <div class="input">
+                <input type="text" name="" placeholder="User id" required>
+            </div>
+            <div class="input">
+                <input type="text" name="" placeholder="Movie id" required>
+            </div>
+            <div class="input">
+                <hh>Movie ratings </hh><select required>
+                <option>0.0</option>
+                <option>0.5</option>
+                <option>1.0</option>
+                <option>1.5</option>
+                <option>2.0</option>
+                <option>2.5</option>
+                <option>3.0</option>
+                <option>3.5</option>
+                <option>4.0</option>
+                <option>4.5</option>
+                <option>5.0</option>
+            </select>
+            </div>
+            <div class="input">
+                <input type="submit" name="" value="Send">
+            </div>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="checkUser">
+        <p><num>0</num>명</p>
+        <button id="count" onclick="">유저 숫자 확인</button>
+        <script type="text/javascript">
+                $(document).ready(function() {
+                    $("#count").on("click", function(e) {
+                        e.preventDefault();
+                        counting();
+                    })
+                })
+
+                function counting() {
+                   fetch("http://localhost:8080/users/_count_")
+                   .then((response) => console.log(response.body));
+                }
+            </script>
+    </div>
+</div>
+<div class="container">
+    <div class="checkMovieList">
+        <form>
+            <legend>유저 무비 레이팅 확인</legend>
+            <div class="input">
+                <input type="text" name="" placeholder="User id" required>
+            </div>
+            <div class="input">
+                <input type="submit" name="" value="Send">
+            </div>
+        </form>
+        <div>User id Movie List</div>
+        <script>
+                for(var movieId = 0; movieId < 10; movieId++){
+                    document.write("<div>User id a   ->  Movie List " + movieId + "</div>");
+                }
+            </script>
+    </div>
+</div>
+
+</body>
+</html>

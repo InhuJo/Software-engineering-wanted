@@ -1,24 +1,11 @@
-FROM ubuntu:20.04
+FROM openjdk:11-jre-slim
 
-ARG SSH_PRIVATE_KEY
+VOLUME /tmp
 
-RUN apt update && apt install -y openssh-server
-RUN apt -y install git vim openjdk-11-jdk maven curl
+EXPOSE 8080
 
-RUN mkdir /var/run/sshd
-RUN mkdir /root/project
-RUN echo 'root:123456789' | chpasswd
-RUN sed -i 's/#*PermitRootLogin prohibit-password/PermitRootLogin yes/g' /etc/ssh/sshd_config
-RUN sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd
+ARG JAR_FILE=target/payroll-0.0.1-SNAPSHOT.jar
 
-RUN mkdir /root/.ssh && chmod 0700 /root/.ssh
-RUN echo "$SSH_PRIVATE_KEY" >> /root/.ssh/id_rsa && chmod 600 /root/.ssh/id_rsa
-RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
+ADD ${JAR_FILE} MRS-springboot.jar
 
-RUN git clone git@github.com:InhuJo/Software-engineering-wanted.git /root/project
-
-ENV NOTVISIBLE="in users profile"
-RUN echo "export VISIBLE=now" >> /etc/profile
-
-EXPOSE 22
-CMD ["/usr/sbin/sshd", "-D"]
+ENTRYPOINT ["java","-jar","/MRS-springboot.jar"]

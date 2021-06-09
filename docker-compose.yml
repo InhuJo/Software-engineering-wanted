@@ -1,0 +1,8 @@
+version: "3.2"      # version 정보를 작성합니다.
+
+services:           # service 목록을 정의합니다.
+  app:              # service의 이름입니다.
+   build: .
+   ports:
+    - "8080:8080"
+  

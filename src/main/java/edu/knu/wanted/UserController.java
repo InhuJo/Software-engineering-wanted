@@ -18,14 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static java.awt.SystemColor.info;
-
 @RestController
 public class UserController {
-    private final UserRepository repository;
+    UserController() {
 
-    UserController(UserRepository repository){
-        this.repository = repository;
     }
 
     // 디비 연결
@@ -244,7 +240,7 @@ public class UserController {
         // 영화아이디가 존재하는지 검사
         if(doc_ != null) {
             try {
-                br = Files.newBufferedReader(Paths.get("./ml-latest-small/ratings.csv"));
+                br = Files.newBufferedReader(Paths.get("./ml-latest-small/movies.csv"));
                 String line = "";
                 while((line = br.readLine()) != null) {
                     array=line.split(",");
