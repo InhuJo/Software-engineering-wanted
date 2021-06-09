@@ -34,3 +34,12 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+  
+  my_another_actions:
+    runs-on: macos-latest
+    steps:
+      - name: checking out.
+        uses: actions/checkout@v2
+        
+      - name: Run a commend.
+        run: ls ${{ github.workspace }}
