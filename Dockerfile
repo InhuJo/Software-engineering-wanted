@@ -4,7 +4,7 @@ VOLUME /tmp
 
 EXPOSE 8080
 
-ARG JAR_FILE=target/payroll-0.0.1-SNAPSHOT.jar
+ARG JAR_FILE=payroll-0.0.1-SNAPSHOT.jar
 
 ADD ${JAR_FILE} MRS-springboot.jar
 
